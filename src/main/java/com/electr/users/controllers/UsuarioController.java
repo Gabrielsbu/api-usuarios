@@ -28,7 +28,7 @@ public class UsuarioController {
         return usuarioService.buscarUsuarioPorId(usuarioId);
     }
 
-    @PostMapping
+    @PostMapping("/salvar-usuario")
     public UsuarioDTO salvarUsuario(@RequestParam("nome") String nome,
                                     @RequestParam("email") String email,
                                     @RequestParam("avatar") MultipartFile avatar,

@@ -66,6 +66,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         Role roleExistent = roleRepository.findById(roleId)
                 .orElseThrow(() -> new AllException("Role not found", HttpStatus.NOT_FOUND));
 
+        Usuario usuarioExistent = usuarioRepository.findUsuarioByEmail(email);
+
+        if(usuarioExistent != null) {
+            throw new AllException("Já existe um usuário com este email cadastrado, tente novamente com outro email", HttpStatus.BAD_REQUEST);
+        }
+
         String fileDownloadUri = avatarService.createImageInServer(avatar);
 
         String senhaCodificada = gerarSenhaCodificada();
