@@ -74,7 +74,7 @@ public class AvatarServiceImpl implements AvatarService {
         String pictureName = savePictureOnDisc(picture);
 
         return ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v1/usuarios/search-picture/").path(pictureName).toUriString();
+                .path("/usuarios/search-picture/").path(pictureName).toUriString();
     }
 
     @Override

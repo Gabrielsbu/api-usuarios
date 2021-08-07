@@ -17,7 +17,7 @@ public interface UsuarioService {
 
     UsuarioDTO buscarUsuarioPorId(Long usuarioId);
 
-    UsuarioDTO salvarUsuario(String nome, String email, MultipartFile avatar);
+    UsuarioDTO salvarUsuario(String nome, String email, MultipartFile avatar, Long roleId);
 
     UsuarioDTO atualizarUsuario(Long usuarioId, String nome, String email, MultipartFile avatar);
 

@@ -1,8 +1,9 @@
 package com.electr.users.authentication.configuration;
 
-import com.electr.users.authentication.constant.URLS;
 import com.electr.users.authentication.filters.JwtAuthenticationEntryPoint;
 import com.electr.users.authentication.filters.JwtAuthorizationFilter;
+import com.electr.users.domain.constants.urls;
+import com.electr.users.domain.constants.urls.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -54,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().cors().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests().antMatchers(URLS.PUBLIC_URLS).permitAll()
+                .and().authorizeRequests().antMatchers("/auth/authentication").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)

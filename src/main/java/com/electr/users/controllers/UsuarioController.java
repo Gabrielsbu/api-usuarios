@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-@RequestMapping("/api/v1/usuarios")
+@RequestMapping("/usuarios")
 @RestController
 @RequiredArgsConstructor
 public class UsuarioController {
@@ -31,9 +31,10 @@ public class UsuarioController {
     @PostMapping
     public UsuarioDTO salvarUsuario(@RequestParam("nome") String nome,
                                     @RequestParam("email") String email,
-                                    @RequestParam("avatar") MultipartFile avatar){
+                                    @RequestParam("avatar") MultipartFile avatar,
+                                    @RequestParam("roleId") Long roleId){
 
-        return usuarioService.salvarUsuario(nome, email, avatar);
+        return usuarioService.salvarUsuario(nome, email, avatar, roleId);
     }
 
     @PutMapping("/{usuarioId}")

@@ -27,8 +27,9 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     private StatusUser status;
 
-    private String role;
-    private String authorities;
+    @OneToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     @Column(columnDefinition = "TEXT")
     private String token;

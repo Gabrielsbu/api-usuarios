@@ -4,9 +4,17 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.electr.users.domain.dto.PayloadJwtDTO;
+import com.electr.users.domain.dto.UsuarioDTO;
+import com.electr.users.domain.models.Usuario;
 import com.electr.users.domain.models.UsuarioPrincipal;
+import com.electr.users.domain.repositories.UsuarioRepository;
+import com.electr.users.exceptions.AllException;
+import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,17 +23,17 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class JWTConfig {
 
     @Value("${jwt.secret}")
     private String secret;
+    private final UsuarioRepository usuarioRepository;
+
 
     public String generateJwtToken(UsuarioPrincipal usuarioPrincipal) {
 
@@ -77,11 +85,6 @@ public class JWTConfig {
         return StringUtils.isNotEmpty(nome) && !isTokenExpired(verifier, token);
     }
 
-    public String getSubject(String token) {
-        JWTVerifier verifier = getJWTVerifier();
-        return verifier.verify(token).getSubject();
-    }
-
     public String[] getClaimsFromToken(String token) {
         JWTVerifier verifier = getJWTVerifier();
         return verifier.verify(token).getClaim("Authorities").asArray(String.class);
@@ -101,6 +104,48 @@ public class JWTConfig {
     }
 
     private String getRoleFromUser(UsuarioPrincipal usuarioPrincipal) {
-        return usuarioPrincipal.getUsuario().getRole();
+        return usuarioPrincipal.getUsuario().getRole().getRoleLabelPt();
+    }
+
+    public Usuario userExistent(String token){
+        Usuario usuario = usuarioRepository.findUsuarioByToken(token);
+
+        if(usuario == null) {
+            throw new AllException("Autenticação não encontrada", HttpStatus.UNAUTHORIZED);
+        }
+
+        return usuario;
+    }
+
+    public PayloadJwtDTO getPayloadToken(String token){
+        Base64.Decoder decoder = Base64.getDecoder();
+        String[] partsBearer = token.split(" ");
+        String[] partsToken = partsBearer[1].split("\\.");
+
+        if (partsBearer.length != 2 || !"Bearer".equals(partsBearer[0])) {
+            throw new AllException("Incorrect authorization structure");
+        }
+
+        Usuario usuario = userExistent(partsBearer[1]);
+
+        if(usuario == null) {
+            throw new AllException("Usuario não encontrado");
+        }
+
+        JWTVerifier verifier = getJWTVerifier();
+
+        boolean tokenExpired = isTokenExpired(verifier, partsBearer[1]);
+
+        if(!tokenExpired){
+            throw new AllException("Token expirou", HttpStatus.UNAUTHORIZED);
+        }
+
+        String payload = new String(decoder.decode(partsToken[1]));
+
+        Gson gson = new Gson();
+
+        String payloadJson;
+        payloadJson = payload.replace("Bearer ", "");
+        return gson.fromJson(payloadJson, PayloadJwtDTO.class);
     }
 }

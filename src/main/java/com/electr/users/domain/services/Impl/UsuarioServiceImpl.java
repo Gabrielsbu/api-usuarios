@@ -3,7 +3,9 @@ package com.electr.users.domain.services.Impl;
 import com.electr.users.domain.dto.UsuarioDTO;
 import com.electr.users.domain.enums.StatusUser;
 
+import com.electr.users.domain.models.Role;
 import com.electr.users.domain.models.Usuario;
+import com.electr.users.domain.repositories.RoleRepository;
 import com.electr.users.domain.repositories.UsuarioRepository;
 import com.electr.users.domain.services.AvatarService;
 import com.electr.users.domain.services.UsuarioService;
@@ -30,6 +32,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioConverter usuarioConverter;
     private final AvatarService avatarService;
+    private final RoleRepository roleRepository;
 
     @Override
     public List<UsuarioDTO> buscarTodosUsuarios(){
@@ -54,11 +57,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         String senha = RandomStringUtils.randomAlphanumeric(10);
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
-        return bCryptPasswordEncoder.encode(senha);
+        return bCryptPasswordEncoder.encode("12345678");
     }
 
     @Override
-    public UsuarioDTO salvarUsuario(String nome, String email, MultipartFile avatar){
+    public UsuarioDTO salvarUsuario(String nome, String email, MultipartFile avatar, Long roleId){
+
+        Role roleExistent = roleRepository.findById(roleId)
+                .orElseThrow(() -> new AllException("Role not found", HttpStatus.NOT_FOUND));
 
         String fileDownloadUri = avatarService.createImageInServer(avatar);
 
@@ -69,8 +75,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setEmail(email);
         usuario.setSenha(senhaCodificada);
         usuario.setStatus(StatusUser.ACTIVE);
-        usuario.setRole("Administrador");
-        usuario.setAuthorities("usuario:read, usuario:create, usuario:delete, usuario:update");
+        usuario.setRole(roleExistent);
         usuario.setAvatar(fileDownloadUri);
 
         return usuarioConverter.toModelDTO(usuarioRepository.save(usuario));

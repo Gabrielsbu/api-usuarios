@@ -1,8 +1,12 @@
 package com.electr.users.authentication.filters;
 
 import com.electr.users.authentication.jwt.JWTConfig;
+import com.electr.users.domain.dto.PayloadJwtDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,41 +17,32 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JWTConfig jwtConfig;
 
-    public JwtAuthorizationFilter(JWTConfig jwtConfig) {
-        this.jwtConfig = jwtConfig;
-    }
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        try {
+            String token = request.getHeader("Authorization");
+            PayloadJwtDTO payloadToken = jwtConfig.getPayloadToken(token);
 
-        if(request.getMethod().equalsIgnoreCase("OPTIONS")) {
-            response.setStatus(200);
-        } else {
-            String authorizationHeader = request.getHeader("Authorization");
 
-            if(authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+            List<SimpleGrantedAuthority> authorities = payloadToken.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
-            String token = authorizationHeader.substring("Bearer ".length());
-            String username = jwtConfig.getSubject(token);
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    payloadToken,
+                    null,
+                    authorities
+            );
 
-            if (jwtConfig.isTokenValid(username, token) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                List<GrantedAuthority> authorities = jwtConfig.getAuthorities(token);
-                Authentication authentication = jwtConfig.getAuthentication(username, authorities, request);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                SecurityContextHolder.clearContext();
-            }
+            SecurityContextHolder.getContext().setAuthentication(auth);
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

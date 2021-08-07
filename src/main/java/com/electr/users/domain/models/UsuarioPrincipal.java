@@ -22,7 +22,7 @@ public class UsuarioPrincipal implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        String[] authorities = this.usuario.getAuthorities().split(",");
+        String[] authorities = this.usuario.getRole().getAuthorities().split(",");
 
         return Arrays.stream(authorities)
                 .map(SimpleGrantedAuthority::new)
