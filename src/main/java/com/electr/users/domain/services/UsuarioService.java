@@ -19,7 +19,7 @@ public interface UsuarioService {
 
     UsuarioDTO salvarUsuario(String nome, String email, MultipartFile avatar, Long roleId);
 
-    UsuarioDTO atualizarUsuario(Long usuarioId, String nome, String email, MultipartFile avatar);
+    UsuarioDTO atualizarUsuario(Long usuarioId, String nome, String email, MultipartFile avatar, String senha);
 
     ResponseEntity<Void> deletarUsuario(Long usuarioId);
 

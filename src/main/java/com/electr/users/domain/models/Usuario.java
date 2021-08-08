@@ -1,10 +1,7 @@
 package com.electr.users.domain.models;
 
 import com.electr.users.domain.enums.StatusUser;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder(setterPrefix = "set")
 public class Usuario {
 
     @Id

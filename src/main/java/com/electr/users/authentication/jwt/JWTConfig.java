@@ -45,7 +45,7 @@ public class JWTConfig {
                 .withAudience("Portal de controle financeiro")
                 .withIssuedAt(new Date()).withSubject(usuarioPrincipal.getUsername())
                 .withArrayClaim("Authorities", claims).withClaim("Role", role)
-                .withExpiresAt(new Date(System.currentTimeMillis() + 90000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 900000))
                 .sign(Algorithm.HMAC512(secret.getBytes()));
     }
 

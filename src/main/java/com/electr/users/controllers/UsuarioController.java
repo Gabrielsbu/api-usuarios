@@ -40,9 +40,10 @@ public class UsuarioController {
     @PutMapping("/{usuarioId}")
     public UsuarioDTO atualizarUsuario(@PathVariable Long usuarioId, @RequestParam("nome") String nome,
                                        @RequestParam("email") String email,
-                                       @RequestParam("avatar") MultipartFile avatar) {
+                                       @RequestParam("avatar") MultipartFile avatar,
+                                       @RequestParam("senha") String senha) {
 
-        return usuarioService.atualizarUsuario(usuarioId, nome, email, avatar);
+        return usuarioService.atualizarUsuario(usuarioId, nome, email, avatar, senha);
     }
 
     @DeleteMapping("/{usuarioId}")

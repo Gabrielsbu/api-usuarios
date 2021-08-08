@@ -1,5 +1,6 @@
 package com.electr.users.domain.services.Impl;
 
+import com.electr.users.domain.dto.EmailDTO;
 import com.electr.users.domain.dto.UsuarioDTO;
 import com.electr.users.domain.enums.StatusUser;
 
@@ -11,12 +12,14 @@ import com.electr.users.domain.services.AvatarService;
 import com.electr.users.domain.services.UsuarioService;
 import com.electr.users.exceptions.AllException;
 import com.electr.users.utils.UsuarioConverter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,31 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioConverter usuarioConverter;
     private final AvatarService avatarService;
     private final RoleRepository roleRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+
+    private void enviarMsgEmail(EmailDTO email) throws Exception {
+        this.kafkaTemplate
+                .send("enviar-email", UUID.randomUUID().toString(), getString(email));
+    }
+
+    private String getString(EmailDTO email) throws Exception {
+        try {
+            return objectMapper.writeValueAsString(email);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    private String gerarSenha() {
+        return RandomStringUtils.randomAlphanumeric(10);
+    }
+
+    public String gerarSenhaCodificada(String senha) {
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+
+        return bCryptPasswordEncoder.encode(senha);
+    }
 
     @Override
     public List<UsuarioDTO> buscarTodosUsuarios(){
@@ -52,14 +81,6 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new AllException("Usuário não encontrado", HttpStatus.NOT_FOUND)));
     }
 
-    public String gerarSenhaCodificada() {
-
-        String senha = RandomStringUtils.randomAlphanumeric(10);
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-
-        return bCryptPasswordEncoder.encode("12345678");
-    }
-
     @Override
     public UsuarioDTO salvarUsuario(String nome, String email, MultipartFile avatar, Long roleId){
 
@@ -73,23 +94,25 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         String fileDownloadUri = avatarService.createImageInServer(avatar);
+        String senha = gerarSenha();
+        String senhaCriptografada = gerarSenhaCodificada(senha);
+        Usuario usuario = Usuario.builder().setNome(nome).setEmail(email).setSenha(senhaCriptografada).setStatus(StatusUser.ACTIVE)
+                .setRole(roleExistent).setAvatar(fileDownloadUri).build();
+        try {
+            usuarioRepository.save(usuario);
+            enviarMsgEmail(EmailDTO.builder().setEmailDestino(email).setNomeDestino(nome).setMensagem("Sua nova senha foi criada: " + senha).build());
 
-        String senhaCodificada = gerarSenhaCodificada();
+        } catch (Exception e) {
+            throw new AllException(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
 
-        Usuario usuario = new Usuario();
-        usuario.setNome(nome);
-        usuario.setEmail(email);
-        usuario.setSenha(senhaCodificada);
-        usuario.setStatus(StatusUser.ACTIVE);
-        usuario.setRole(roleExistent);
-        usuario.setAvatar(fileDownloadUri);
-
-        return usuarioConverter.toModelDTO(usuarioRepository.save(usuario));
+        return usuarioConverter.toModelDTO(usuario);
     }
 
     @Override
-    public UsuarioDTO atualizarUsuario(Long usuarioId, String nome, String email, MultipartFile avatar){
+    public UsuarioDTO atualizarUsuario(Long usuarioId, String nome, String email, MultipartFile avatar, String senha){
         String fileDownloadUri = avatarService.createImageInServer(avatar);
+        String senhaCodificada = gerarSenhaCodificada(senha);
 
         Usuario usuarioExistente = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new AllException("Usuario não encontrado", HttpStatus.NOT_FOUND));
@@ -106,8 +129,13 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuarioExistente.setAvatar(fileDownloadUri);
         }
 
+        if(senha != null) {
+            usuarioExistente.setSenha(senhaCodificada);
+        }
+
         return usuarioConverter.toModelDTO(usuarioRepository.save(usuarioExistente));
     }
+
 
     @Override
     public ResponseEntity<Void> deletarUsuario(Long usuarioId){
