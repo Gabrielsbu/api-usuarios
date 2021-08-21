@@ -5,6 +5,9 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity(name = "usuarios")
 @Getter
@@ -21,6 +24,9 @@ public class Usuario {
     private String email;
     private String senha;
     private String avatar;
+
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    private List<Simulacao> simulacoes = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private StatusUser status;
