@@ -20,18 +20,19 @@ public class Eletrodomestico {
     private String avatar;
     private String nome;
     private Integer quantidade;
-    private Integer tempoEmMinuto;
+    private Integer tempoEmHora;
     private Integer potencia;
     private Integer diasPorMes;
 
-    @Column(precision=10, scale=2)
-    private Double valorPorMes;
-
-    @Column(precision=10, scale=2)
-    private Double kwhPorMes;
-
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "simulacao_id")
     private Simulacao simulacao;
+
+    @Column(scale = 2, precision = 10)
+    private float valorPorMes;
+
+    @Column(scale = 2, precision = 10)
+    private float kwhPorMes;
 
     private LocalDateTime createEletrodomesticoAt;
     private LocalDateTime updateEletrodomesticoAt;

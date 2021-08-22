@@ -24,11 +24,11 @@ public class Simulacao {
     @OneToMany(mappedBy = "simulacao", fetch = FetchType.LAZY)
     private List<Eletrodomestico> eletrodomesticos = new ArrayList<>();
 
-    @Column(precision=10, scale=2)
-    private Double totalValorPorMes;
+    @Column(scale = 2, precision = 10)
+    private float totalValorPorMes;
 
-    @Column(precision=10, scale=2)
-    private Double totalKwhPorMes;
+    @Column(scale = 2, precision = 10)
+    private float totalKwhPorMes;
 
     private LocalDateTime createSimulationAt;
     private LocalDateTime updateSimulationAt;
