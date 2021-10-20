@@ -13,8 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CreateCharacterDTO {
 
+    private String name;
+    private String role;
     private String school;
-    private String email;
     private String house;
     private String patronus;
 }

@@ -1,5 +1,6 @@
 package com.dextra.makemagic.domain.services.Impl;
 
+import com.dextra.makemagic.domain.dto.UpdatedCharacterDTO;
 import com.dextra.makemagic.domain.models.Character;
 import com.dextra.makemagic.domain.repositories.CharacterRepository;
 import com.dextra.makemagic.domain.dto.CharacterDTO;
@@ -35,12 +36,30 @@ public class CharacterServiceImpl implements CharacterService {
 
     @Override
     public CharacterDTO saveCharacter(CreateCharacterDTO createCharacter) {
-        return null;
+        Character character = Character.builder()
+                .setName(createCharacter.getName())
+                .setRole(createCharacter.getRole())
+                .setSchool(createCharacter.getSchool())
+                .setHouse(createCharacter.getHouse())
+                .setPatronus(createCharacter.getPatronus())
+                .build();
+
+        return characterConverter.toDTO(characterRepository.save(character));
     }
 
     @Override
-    public CharacterDTO updateCharacter(Long characterId) {
-        return null;
+    public CharacterDTO updateCharacter(Long characterId, UpdatedCharacterDTO updatedCharacter) {
+
+        Character characterExistent = characterConverter
+                .toModel(findCharacterById(characterId));
+
+        characterExistent.setName(updatedCharacter.getName());
+        characterExistent.setRole(updatedCharacter.getRole());
+        characterExistent.setSchool(updatedCharacter.getSchool());
+        characterExistent.setHouse(updatedCharacter.getHouse());
+        characterExistent.setPatronus(updatedCharacter.getPatronus());
+
+        return characterConverter.toDTO(characterRepository.save(characterExistent));
     }
 
     @Override

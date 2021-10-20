@@ -2,6 +2,7 @@ package com.dextra.makemagic.controllers;
 
 import com.dextra.makemagic.domain.dto.CharacterDTO;
 import com.dextra.makemagic.domain.dto.CreateCharacterDTO;
+import com.dextra.makemagic.domain.dto.UpdatedCharacterDTO;
 import com.dextra.makemagic.domain.services.CharacterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,8 @@ public class CharacterController {
     }
 
     @PutMapping("/{characterId}")
-    public CharacterDTO updateCharacterById(@PathVariable Long characterId) {
-        return characterService.updateCharacter(characterId);
+    public CharacterDTO updateCharacterById(@PathVariable Long characterId, UpdatedCharacterDTO updatedCharacter) {
+        return characterService.updateCharacter(characterId, updatedCharacter);
     }
 
     @DeleteMapping("/{characterId}")

@@ -2,6 +2,7 @@ package com.dextra.makemagic.domain.services;
 
 import com.dextra.makemagic.domain.dto.CharacterDTO;
 import com.dextra.makemagic.domain.dto.CreateCharacterDTO;
+import com.dextra.makemagic.domain.dto.UpdatedCharacterDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ public interface CharacterService {
 
     CharacterDTO saveCharacter(CreateCharacterDTO createCharacter);
 
-    CharacterDTO updateCharacter(Long characterId);
+    CharacterDTO updateCharacter(Long characterId, UpdatedCharacterDTO updatedCharacter);
 
     ResponseEntity<Void> deleteCharacter(Long characterId);
 }

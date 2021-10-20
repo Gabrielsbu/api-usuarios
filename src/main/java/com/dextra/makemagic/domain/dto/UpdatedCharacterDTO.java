@@ -5,22 +5,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CharacterDTO {
+public class UpdatedCharacterDTO {
 
-    private UUID characterId;
     private String name;
     private String role;
     private String school;
     private String house;
     private String patronus;
 
-    private LocalDateTime createdCharacterAt;
+    private LocalDateTime updatedCharacterAt;
 }

@@ -8,8 +8,8 @@
         <version>2.5.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.electr.alisson</groupId>
-    <artifactId>electr-users</artifactId>
+    <groupId>com.dextra.make-magic</groupId>
+    <artifactId>make-magic</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>make-magic</name>
     <description>Api develop to teste for the Dextra. </description>

@@ -20,11 +20,14 @@ public class Character {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID characterId;
 
+    @Column(name = "character_name")
+    private String name;
+
+    @Column(name = "character_role")
+    private String role;
+
     @Column(name = "character_school")
     private String school;
-
-    @Column(name = "character_email")
-    private String email;
 
     @Column(name = "character_house")
     private String house;
@@ -32,12 +35,12 @@ public class Character {
     @Column(name = "character_patronus")
     private String patronus;
 
-    private LocalDateTime createCharacterAt;
+    private LocalDateTime createdCharacterAt;
     private LocalDateTime updatedCharacterAt;
 
     @PrePersist
     public void prePersist() {
-        this.createCharacterAt = LocalDateTime.now();
+        this.createdCharacterAt = LocalDateTime.now();
     }
 
     @PreUpdate
